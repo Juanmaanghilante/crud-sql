@@ -1,45 +1,55 @@
-
-
-module.exports = (sequelize,DataTypes)=> {
-    const alias ="Movie"
-    const cols ={
-        id:{
-            type:DataTypes.INTEGER.UNSIGNED,
-            primaryKey:true,
-            autoIncrement:true
+module.exports = (sequelize, dataTypes) => {
+    let alias = 'Movie'; // esto debería estar en singular
+    let cols = {
+        id: {
+            type: dataTypes.BIGINT(10).UNSIGNED,
+            primaryKey: true,
+            allowNull: false,
+            autoIncrement: true
         },
-        title:{
-            type:DataTypes.STRING(500),
-            // allowNull:false,
+        // created_at: dataTypes.TIMESTAMP,
+        // updated_at: dataTypes.TIMESTAMP,
+        title: {
+            type: dataTypes.STRING(500),
+            allowNull: false
         },
-        rating:{
-            type:DataTypes.DECIMAL(3,1),
+        rating: {
+            type: dataTypes.DECIMAL(3, 1).UNSIGNED,
+            allowNull: false
         },
-        awards:{
-            type:DataTypes.INTEGER.UNSIGNED,
+        awards: {
+            type: dataTypes.BIGINT(10).UNSIGNED,
+            allowNull: false
         },
-        release_date:{
-            type:DataTypes.DATE,
+        release_date: {
+            type: dataTypes.DATEONLY,
+            allowNull: false
         },
-        length:{
-            type:DataTypes.INTEGER.UNSIGNED,
-        },
-        genre_id:{
-            type:DataTypes.INTEGER.UNSIGNED,
-        },
-        created_at:{
-            type:DataTypes.DATE,
-        },
-        updated_at:{
-            type:DataTypes.DATE,
-        },
-
+        length: dataTypes.BIGINT(10),
+        genre_id: dataTypes.BIGINT(10)
+    };
+    let config = {
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+        deletedAt: false
     }
-    const config={
-        tableName:"movies",
-        timestamps:false
-        
-    }
-    const movie= sequelize.define(alias,cols,config)
-    return movie
-}
+    const Movie = sequelize.define(alias,cols,config);
+
+    Movie.associate= (models)=>{
+        Movie.belongsTo(models.Genre,
+            
+            {
+                as:"generos",
+                foreignKey:"genre_id",
+            })
+
+            Movie.belongsToMany(models.Actor,{
+               
+                through:'Actor_Movie',
+                foreignKey:'movie_id',
+                otherKey:'actor_id'
+            })}
+
+    return Movie
+};
